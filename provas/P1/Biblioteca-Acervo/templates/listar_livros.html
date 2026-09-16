@@ -3,27 +3,38 @@
 {% block content %}
 <h2>Catálogo de Livros</h2>
 
-<table class="table table-striped mt-3">
+<table class="table table-striped mt-3 align-middle">
     <thead>
         <tr>
             <th>Título</th>
             <th>Autor</th>
+            <th>Exemplares (Disponíveis / Total)</th>
             <th>Ações</th>
         </tr>
     </thead>
     <tbody>
         {% for livro in livros %}
         <tr>
-            <td>{{ livro.titulo }}</td>
+            <td><strong>{{ livro.titulo }}</strong></td>
             <td>{{ livro.autor.nome }}</td>
             <td>
+                {% if livro.total_exemplares > 0 %}
+                    <span class="badge {% if livro.disponiveis > 0 %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                        {{ livro.disponiveis }} / {{ livro.total_exemplares }} disponíveis
+                    </span>
+                {% else %}
+                    <span class="badge bg-danger">Nenhum exemplar</span>
+                {% endif %}
+            </td>
+            <td>
                 <a href="{% url 'solicitar_livro' livro.id %}" class="btn btn-sm btn-success">Emprestar / Reservar</a>
-                <a href="{% url 'fila_reservas' livro.id %}" class="btn btn-sm btn-info text-white">Ver Fila de Reserva</a>
+                <a href="{% url 'cadastrar_exemplar' livro.id %}" class="btn btn-sm btn-outline-primary">+ Exemplar</a>
+                <a href="{% url 'fila_reservas' livro.id %}" class="btn btn-sm btn-info text-white">Fila de Reserva</a>
             </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="3">Nenhum livro cadastrado.</td>
+            <td colspan="4">Nenhum livro cadastrado.</td>
         </tr>
         {% endfor %}
     </tbody>

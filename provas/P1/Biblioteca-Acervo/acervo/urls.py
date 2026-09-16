@@ -27,4 +27,5 @@ urlpatterns = [
         views.cadastrar_exemplar,
         name="cadastrar_exemplar",
     ),
+    path("membro/novo/", views.cadastrar_membro, name="cadastrar_membro"),
 ]

@@ -18,10 +18,18 @@
                 <option value="{{ autor.id }}">{{ autor.nome }}</option>
             {% endfor %}
         </select>
-        <small class="text-muted">Não encontrou o autor? <a href="{% url 'cadastrar_autor' %}">Cadastre um novo autor aqui</a>.</small>
+        <small class="text-muted">Não encontrou? <a href="{% url 'cadastrar_autor' %}">Cadastre um autor aqui</a>.</small>
     </div>
 
-    <button type="submit" class="btn btn-primary">Salvar e Avançar</button>
+    <hr>
+    <h5> Exemplar Inicial</h5>
+    <div class="mb-3">
+        <label for="codigo_patrimonio" class="form-label">Código de Patrimônio (Opcional):</label>
+        <input type="text" name="codigo_patrimonio" id="codigo_patrimonio" class="form-control" placeholder="Ex: PAT-001">
+        <small class="text-muted">Preencha para criar a 1ª cópia disponível imediatamente.</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salvar Livro</button>
     <a href="{% url 'lista_livros' %}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}
