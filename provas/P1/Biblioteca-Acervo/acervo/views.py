@@ -7,17 +7,17 @@ from .models import Autor, Emprestimo, Exemplar, Livro, Membro, Reserva
 from django.contrib.auth.models import User
 
 
-# --- CADASTRAR MEMBRO ---
+
 def cadastrar_membro(request):
     if request.method == "POST":
         username = request.POST.get("username")
         telefone = request.POST.get("telefone")
 
         if username:
-            # Cria o usuário base do Django ou reaproveita se existir
+            
             user, created = User.objects.get_or_create(username=username)
 
-            # Verifica se já é membro
+           
             if hasattr(user, "membro"):
                 messages.warning(
                     request, f"O usuário '{username}' já é um membro registrado."
@@ -32,10 +32,10 @@ def cadastrar_membro(request):
     return render(request, "cadastrar_membro.html")
 
 
-# --- PÁGINA INICIAL / LISTA DE LIVROS ---
+
 def lista_livros(request):
     livros = Livro.objects.all()
-    # Adicionamos contagem de exemplares disponíveis para exibição no template
+    
     for livro in livros:
         livro.total_exemplares = livro.exemplares.count()
         livro.disponiveis = livro.exemplares.filter(
@@ -45,7 +45,7 @@ def lista_livros(request):
     return render(request, "listar_livros.html", {"livros": livros})
 
 
-# --- CADASTRAR AUTOR ---
+
 def cadastrar_autor(request):
     if request.method == "POST":
         nome = request.POST.get("nome")
@@ -57,7 +57,7 @@ def cadastrar_autor(request):
     return render(request, "cadastrar_autor.html")
 
 
-# --- CADASTRAR LIVRO (Com criação automática do 1º exemplar opcional) ---
+
 def cadastrar_livro(request):
     if request.method == "POST":
         titulo = request.POST.get("titulo")
@@ -68,7 +68,7 @@ def cadastrar_livro(request):
             autor = get_object_or_404(Autor, pk=autor_id)
             livro = Livro.objects.create(titulo=titulo, autor=autor)
 
-            # Se o usuário informou um patrimônio/tombo inicial, cria o 1º exemplar
+          
             if codigo_patrimonio:
                 Exemplar.objects.create(
                     livro=livro,
@@ -91,7 +91,7 @@ def cadastrar_livro(request):
     return render(request, "cadastrar_livro.html", {"autores": autores})
 
 
-# --- CADASTRAR EXEMPLAR ADICIONAL ---
+
 def cadastrar_exemplar(request, livro_id=None):
     livro_selecionado = None
     if livro_id:
@@ -103,7 +103,7 @@ def cadastrar_exemplar(request, livro_id=None):
 
         if l_id and codigo:
             livro = get_object_or_404(Livro, pk=l_id)
-            # Verifica se já existe um exemplar com este mesmo código
+
             if Exemplar.objects.filter(codigo_patrimonio=codigo).exists():
                 messages.error(
                     request,
@@ -127,7 +127,7 @@ def cadastrar_exemplar(request, livro_id=None):
     )
 
 
-# --- REALIZAR EMPRÉSTIMO OU ENTRAR NA FILA DE RESERVA ---
+
 def solicitar_livro(request, livro_id):
     livro = get_object_or_404(Livro, pk=livro_id)
 
@@ -135,7 +135,7 @@ def solicitar_livro(request, livro_id):
         membro_id = request.POST.get("membro_id")
         membro = get_object_or_404(Membro, pk=membro_id)
 
-        # 1. Verifica se existem exemplares cadastrados para o livro
+
         if not livro.exemplares.exists():
             messages.error(
                 request,
@@ -143,13 +143,13 @@ def solicitar_livro(request, livro_id):
             )
             return redirect("cadastrar_exemplar", livro_id=livro.id)
 
-        # 2. Busca por um exemplar disponível
+
         exemplar_disponivel = Exemplar.objects.filter(
             livro=livro, status="disponivel"
         ).first()
 
         if exemplar_disponivel:
-            # Empréstimo realizado (prazo de 14 dias)
+
             Emprestimo.objects.create(
                 exemplar=exemplar_disponivel,
                 membro=membro,
@@ -162,7 +162,7 @@ def solicitar_livro(request, livro_id):
                 f"Empréstimo do exemplar '{exemplar_disponivel.codigo_patrimonio}' realizado para {membro}!",
             )
         else:
-            # Não há exemplar livre no momento -> Entra na Fila de Reserva
+
             Reserva.objects.create(livro=livro, membro=membro)
             messages.info(
                 request,
@@ -179,7 +179,7 @@ def solicitar_livro(request, livro_id):
     )
 
 
-# --- FILA DE RESERVAS ---
+
 def fila_reservas(request, livro_id):
     livro = get_object_or_404(Livro, pk=livro_id)
     reservas = Reserva.objects.filter(livro=livro, atendida=False).order_by(
@@ -192,7 +192,7 @@ def fila_reservas(request, livro_id):
     )
 
 
-# --- LISTA DE EMPRÉSTIMOS ---
+
 def lista_emprestimos(request):
     emprestimos = Emprestimo.objects.all().order_by("-data_emprestimo")
     return render(
@@ -202,7 +202,7 @@ def lista_emprestimos(request):
     )
 
 
-# --- DEVOLUÇÃO E TRANSFERÊNCIA DE RESERVA ---
+
 def devolver_livro(request, emprestimo_id):
     emprestimo = get_object_or_404(Emprestimo, pk=emprestimo_id)
 
@@ -216,7 +216,6 @@ def devolver_livro(request, emprestimo_id):
 
         exemplar = emprestimo.exemplar
 
-        # Verifica se há reserva pendente para o livro
         proxima_reserva = (
             Reserva.objects.filter(livro=exemplar.livro, atendida=False)
             .order_by("data_reserva")
@@ -224,7 +223,7 @@ def devolver_livro(request, emprestimo_id):
         )
 
         if proxima_reserva:
-            # Atende a reserva e gera novo empréstimo imediatamente
+
             proxima_reserva.atendida = True
             proxima_reserva.save()
 
