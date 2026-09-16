@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Solicitar: {{ livro.titulo }}</h2>
+
+<form method="post" class="mt-3">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="membro_id" class="form-label">Selecione o Membro:</label>
+        <select name="membro_id" id="membro_id" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            {% for membro in membros %}
+                <option value="{{ membro.id }}">{{ membro.usuario.username }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Confirmar</button>
+    <a href="{% url 'lista_livros' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

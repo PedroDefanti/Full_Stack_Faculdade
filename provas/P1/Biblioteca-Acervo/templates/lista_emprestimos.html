@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Empréstimos Realizados</h2>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>Livro / Exemplar</th>
+            <th>Membro</th>
+            <th>Data Empréstimo</th>
+            <th>Devolução Prevista</th>
+            <th>Data Devolução</th>
+            <th>Multa (Atraso)</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for emp in emprestimos %}
+        <tr>
+            <td>{{ emp.exemplar.livro.titulo }} ({{ emp.exemplar.codigo_patrimonio }})</td>
+            <td>{{ emp.membro.usuario.username }}</td>
+            <td>{{ emp.data_emprestimo }}</td>
+            <td>{{ emp.data_prevista_devolucao }}</td>
+            <td>{{ emp.data_devolucao|default:"Em aberto" }}</td>
+            <td>
+                {% if emp.valor_multa > 0 %}
+                    <span class="text-danger fw-bold">R$ {{ emp.valor_multa|floatformat:2 }}</span>
+                {% else %}
+                    R$ 0,00
+                {% endif %}
+            </td>
+            <td>
+                {% if not emp.data_devolucao %}
+                    <a href="{% url 'devolver_livro' emp.id %}" class="btn btn-sm btn-warning">Devolver</a>
+                {% else %}
+                    <span class="badge bg-secondary">Devolvido</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">Nenhum empréstimo registrado.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
