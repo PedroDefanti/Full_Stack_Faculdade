@@ -1,45 +1,44 @@
-from django.shortcuts import render
-from .models import Livro,Acervo
+from django.shortcuts import render, redirect
+from .models import Livro
+from .forms import LivroForm
 
 def lista_livros(request):
-    livros = Livro.objects.all() # busca no banco
-    return render(
-        request, 'acervo/lista.html',
-        {'livros': livros} # envia ao template
-    )
+    livros = Livro.objects.all()
+    return render(request, 'lista.html', {'livros': livros})
     
 def novo_livro(request):
     if request.method == 'POST':
         form = LivroForm(request.POST)
         if form.is_valid():
-            form.save() # grava no banco
+            form.save()
             return redirect('lista')
     else:
         form = LivroForm()
-    return render(request, 'acervo/form.html', {'form': form})   
+    return render(request, 'forms.html', {'form': form}) 
 
-
-def Acervo(request):
-    nome=request.GET.get("busca","")
-    tipo=request.GET.get("tipo","")
-    categoria=request.GET.get("categoria","")
+def buscar_acervo(request):
+    nome = request.GET.get("busca", "")
+    tipo = request.GET.get("tipo", "")
+    categoria = request.GET.get("categoria", "")
     
-    acervo=Acervo.objects.all()
+    # Agora buscamos direto na tabela de Livros
+    livros = Livro.objects.all()
     
     if nome:
-        acervo=acervo.filter(nome__icontains=nome)
+        livros = livros.filter(titulo__icontains=nome) # Mudado de 'nome' para 'titulo'
         
     if tipo:
-        acervo=acervo.filter(tipo_acervo=tipo)
+        livros = livros.filter(tipo=tipo) 
         
     if categoria:
-        acervo=acervo.filter(categoria=categoria)
+        livros = livros.filter(categoria=categoria)
         
-    
-    context={
-        'produto':acervo,
-        'nome':nome,
-        'tipo':tipo,
-        'categoria':categoria
+    context = {
+        'acervos': livros, # Mantém a variável 'acervos' para não quebrar o HTML de busca
+        'nome': nome,
+        'tipo_selecionado': tipo,
+        'categoria_selecionada': categoria,
+        'tipos_choices': Livro.TIPO_ACERVO_CHOICES,        
+        'categorias_choices': Livro.CATEGORIA_CHOICES     
     }
-    return render(request,'busca.html',context)
+    return render(request, 'busca.html', context)
