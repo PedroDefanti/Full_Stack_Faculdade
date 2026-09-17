@@ -21,11 +21,11 @@ def buscar_acervo(request):
     tipo = request.GET.get("tipo", "")
     categoria = request.GET.get("categoria", "")
     
-    # Agora buscamos direto na tabela de Livros
+ 
     livros = Livro.objects.all()
     
     if nome:
-        livros = livros.filter(titulo__icontains=nome) # Mudado de 'nome' para 'titulo'
+        livros = livros.filter(titulo__icontains=nome) 
         
     if tipo:
         livros = livros.filter(tipo=tipo) 
@@ -34,7 +34,7 @@ def buscar_acervo(request):
         livros = livros.filter(categoria=categoria)
         
     context = {
-        'acervos': livros, # Mantém a variável 'acervos' para não quebrar o HTML de busca
+        'acervos': livros, 
         'nome': nome,
         'tipo_selecionado': tipo,
         'categoria_selecionada': categoria,
