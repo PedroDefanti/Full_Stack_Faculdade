@@ -24,7 +24,7 @@ class Livro(models.Model):
     ano = models.IntegerField()
     disponivel = models.BooleanField(default=True)
     
-    # Adicionando os campos que faltavam diretamente no Livro
+    
     tipo = models.CharField(max_length=50, choices=TIPO_ACERVO_CHOICES, default="Fisico")
     categoria = models.CharField(max_length=150, choices=CATEGORIA_CHOICES, default="800")
     
