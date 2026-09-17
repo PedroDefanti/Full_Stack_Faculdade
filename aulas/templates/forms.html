@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Cadastrar Novo Item{% endblock %}
+
+{% block conteudo %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Cadastro de Acervo / Livro</h2>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                 
+                    {{ form.as_p }}
+                    
+                    <button type="submit" class="btn btn-success">Salvar</button>
+                    <a href="{% url 'buscar_acervo' %}" class="btn btn-secondary">Voltar à Busca</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
