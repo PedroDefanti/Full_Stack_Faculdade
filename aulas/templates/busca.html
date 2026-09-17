@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Busca de Acervo{% endblock %}
+
+{% block conteudo %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        
+        <h2 class="mb-4 fw-bold text-dark"> Pesquisar no Acervo</h2>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4 bg-white rounded">
+                <form method="GET" action="" class="row g-3">
+                    
+                  
+                    <div class="col-md-4">
+                        <label for="busca" class="form-label fw-bold text-muted small">TÍTULO DO LIVRO</label>
+                        <input type="text" id="busca" name="busca" value="{{ nome|default:'' }}" class="form-control" placeholder="Ex: Dom Casmurro...">
+                    </div>
+                    
+                   
+                    <div class="col-md-4">
+                        <label for="tipo" class="form-label fw-bold text-muted small">TIPO DE ACERVO</label>
+                        <select id="tipo" name="tipo" class="form-select">
+                            <option value="">Todos os Tipos</option>
+                            {% for valor, rotulo in tipos_choices %}
+                                <option value="{{ valor }}" {% if tipo_selecionado == valor %}selected{% endif %}>
+                                    {{ rotulo }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                  
+                    <div class="col-md-4">
+                        <label for="categoria" class="form-label fw-bold text-muted small">CATEGORIA</label>
+                        <select id="categoria" name="categoria" class="form-select">
+                            <option value="">Todas as Categorias</option>
+                            {% for valor, rotulo in categorias_choices %}
+                                <option value="{{ valor }}" {% if categoria_selecionada == valor %}selected{% endif %}>
+                                    {{ rotulo }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+               
+                    <div class="col-12 d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Pesquisar</button>
+                        <a href="{% url 'buscar_acervo' %}" class="btn btn-outline-secondary px-3">Limpar Filtros</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="card-title mb-4 text-secondary fs-5">Resultados da Busca</h4>
+                
+                <div class="list-group list-group-flush">
+                    {% for livro in acervos %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-0 border-bottom">
+                            <div>
+                                <h5 class="mb-1 fw-bold text-dark">{{ livro.titulo }}</h5>
+                                <p class="mb-1 text-muted small">
+                                    <strong>Autor:</strong> {{ livro.autor }} &bull; 
+                                    <strong>Ano:</strong> {{ livro.ano }}
+                                </p>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-dark mb-1">{{ livro.get_tipo_display }}</span><br>
+                                <span class="badge bg-secondary text-wrap" style="max-width: 250px;">
+                                    {{ livro.get_categoria_display }}
+                                </span>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <p class="mb-0 fs-5">Nenhum livro encontrado com esses filtros.</p>
+                            <small>Tente buscar por termos mais genéricos ou limpar os filtros.</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}
