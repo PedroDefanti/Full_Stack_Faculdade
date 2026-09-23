@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Autor, Emprestimo, Exemplar, Livro, Membro, Reserva
 from django.contrib.auth.models import User
+from django.db.models import Q,Exists
 
 
 
@@ -245,3 +246,42 @@ def devolver_livro(request, emprestimo_id):
             )
 
     return redirect("lista_emprestimos")
+
+
+from django.db.models import Q
+from django.shortcuts import render
+from .models import Livro
+
+
+def buscar_livro(request):
+    busca = request.GET.get("pesquisa", default="")
+    status = request.GET.get("status", default="todos")
+
+    filtro_total = Q()
+
+  
+    if busca:
+        filtro_total &= Q(titulo__icontains=busca) | Q(
+            autor__nome__icontains=busca
+        )
+
+    resultados = Livro.objects.filter(filtro_total).select_related("autor")
+
+    
+    if status == "disponivel":
+        resultados = resultados.filter(exemplares__status="disponivel")
+    elif status == "emprestado":
+        resultados = resultados.filter(exemplares__status="emprestado")
+    elif status == "manutencao":
+        resultados = resultados.filter(exemplares__status="manutencao")
+
+    
+    resultados = resultados.distinct()
+
+    return render(
+        request,
+        "buscar_livro.html",
+        {"resultados": resultados, "status_atual": status},
+    )
+
+
