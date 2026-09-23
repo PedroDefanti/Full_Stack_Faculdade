@@ -21,4 +21,6 @@ urlpatterns = [
     path("exemplar/novo/<int:livro_id>/",views.cadastrar_exemplar,name="cadastrar_exemplar",),
     
     path("membro/novo/", views.cadastrar_membro, name="cadastrar_membro"),
+    
+    path("buscar_livro",views.buscar_livro,name='buscar_livro')
 ]
