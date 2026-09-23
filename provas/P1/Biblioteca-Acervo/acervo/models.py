@@ -18,6 +18,18 @@ class Livro(models.Model):
 
     def __str__(self):
         return self.titulo
+    
+    @property
+    def tem_disponivel(self):
+        return self.exemplares.filter(status="disponivel").exists()
+
+    @property
+    def tem_emprestado(self):
+        return self.exemplares.filter(status="emprestado").exists()
+
+    @property
+    def tem_manutencao(self):
+        return self.exemplares.filter(status="manutencao").exists()
 
 
 class Membro(models.Model):
