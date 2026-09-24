@@ -15,6 +15,7 @@ class Livro(models.Model):
     autor = models.ForeignKey(
         Autor, on_delete=models.CASCADE, related_name="livros"
     )
+    ano = models.IntegerField()
 
     def __str__(self):
         return self.titulo
