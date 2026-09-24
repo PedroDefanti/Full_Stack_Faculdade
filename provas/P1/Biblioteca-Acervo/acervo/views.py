@@ -5,7 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Autor, Emprestimo, Exemplar, Livro, Membro, Reserva
 from django.contrib.auth.models import User
-from django.db.models import Q,Exists
+from django.db.models import Q
+from .forms import LivroForm
 
 
 
@@ -61,15 +62,12 @@ def cadastrar_autor(request):
 
 def cadastrar_livro(request):
     if request.method == "POST":
-        titulo = request.POST.get("titulo")
-        autor_id = request.POST.get("autor_id")
+        form = LivroForm(request.POST)
         codigo_patrimonio = request.POST.get("codigo_patrimonio")
 
-        if titulo and autor_id:
-            autor = get_object_or_404(Autor, pk=autor_id)
-            livro = Livro.objects.create(titulo=titulo, autor=autor)
+        if form.is_valid():
+            livro = form.save()
 
-          
             if codigo_patrimonio:
                 Exemplar.objects.create(
                     livro=livro,
@@ -83,13 +81,19 @@ def cadastrar_livro(request):
             else:
                 messages.warning(
                     request,
-                    f"Livro '{livro.titulo}' cadastrado, mas sem exemplares. Cadastre ao menos um exemplar para permitir empréstimos.",
+                    f"Livro '{livro.titulo}' cadastrado, mas sem exemplares.",
                 )
 
             return redirect("lista_livros")
+    else:
+        form = LivroForm()
 
+   
     autores = Autor.objects.all()
-    return render(request, "cadastrar_livro.html", {"autores": autores})
+
+    return render(
+        request, "cadastrar_livro.html", {"form": form, "autores": autores}
+    )
 
 
 
