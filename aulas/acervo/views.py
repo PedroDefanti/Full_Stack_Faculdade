@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
 from .models import Livro
 from .forms import LivroForm
+from rest_framework import generics
+from .serializer import LivroSerializer
+
 
 def lista_livros(request):
     livros = Livro.objects.all()
@@ -42,3 +45,13 @@ def buscar_acervo(request):
         'categorias_choices': Livro.CATEGORIA_CHOICES     
     }
     return render(request, 'busca.html', context)
+
+
+class LivroListCreate(generics.ListCreateAPIView):
+    queryset=Livro.objects.all()
+    serializer_class=LivroSerializer
+    
+class LivroDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset=Livro.objects.all()
+    serializer_class=LivroSerializer
+    
