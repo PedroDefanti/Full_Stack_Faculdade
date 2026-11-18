@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .search-container {
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .search-title {
+        font-size: 1.5rem;
+        color: #2d3748;
+        margin-bottom: 12px;
+        font-weight: 600;
+        display: block;
+    }
+
+    .search-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 14px 20px;
+        font-size: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.3s ease;
+        background-color: #fff;
+        color: #1a202c;
+    }
+
+    .search-input:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .search-button {
+        padding: 0 24px;
+        font-size: 1rem;
+        font-weight: 500;
+        background-color: #4f46e5;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .search-button:hover {
+        background-color: #4338ca;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .filter-radio {
+        display: none;
+    }
+
+    .filter-label {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        cursor: pointer;
+        background-color: #f7fafc;
+        color: #4a5568;
+        transition: all 0.2s ease;
+    }
+
+    .filter-radio:checked + .filter-label {
+        background-color: #4f46e5;
+        color: white;
+        border-color: #4f46e5;
+        font-weight: 500;
+    }
+
+    .results-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .book-item {
+        background: #ffffff;
+        padding: 16px 20px;
+        border-radius: 8px;
+        border: 1px solid #edf2f7;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .book-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border-color: #e2e8f0;
+    }
+
+    .book-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .book-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1a202c;
+    }
+
+    .book-author {
+        font-size: 0.9rem;
+        color: #718096;
+    }
+
+    .book-exemplares {
+        font-size: 0.8rem;
+        color: #a0aec0;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .badge-disponivel { background-color: #def7ec; color: #03543f; border: 1px solid #84e1bc; }
+    .badge-emprestado { background-color: #feecdc; color: #b43403; border: 1px solid #fbd38d; }
+    .badge-manutencao { background-color: #fde8e8; color: #9b1c1c; border: 1px solid #f8b4b4; }
+
+    .empty-message {
+        text-align: center;
+        padding: 40px 20px;
+        color: #a0aec0;
+        font-size: 1rem;
+        border: 2px dashed #e2e8f0;
+        border-radius: 8px;
+        background-color: #f7fafc;
+    }
+</style>
+
+<div class="search-container">
+    <label for="id_pesquisa" class="search-title">Buscar no Acervo</label>
+    
+    <form method="GET" action="{% url 'buscar_livro' %}" class="search-form" id="searchForm">
+        <div class="input-group">
+            <input 
+                type="text" 
+                id="id_pesquisa" 
+                name="pesquisa" 
+                class="search-input"
+                value="{{ request.GET.pesquisa }}" 
+                placeholder="Digite o título ou o autor..."
+            >
+            <button type="submit" class="search-button">Pesquisar</button>
+        </div>
+
+        <div class="filter-group">
+            <input type="radio" id="status_todos" name="status" value="todos" class="filter-radio" 
+                   {% if status_atual == 'todos' %}checked{% endif %} onchange="document.getElementById('searchForm').submit();">
+            <label for="status_todos" class="filter-label">Todos</label>
+
+            <input type="radio" id="status_disponivel" name="status" value="disponivel" class="filter-radio" 
+                   {% if status_atual == 'disponivel' %}checked{% endif %} onchange="document.getElementById('searchForm').submit();">
+            <label for="status_disponivel" class="filter-label">Disponíveis</label>
+
+            <input type="radio" id="status_emprestado" name="status" value="emprestado" class="filter-radio" 
+                   {% if status_atual == 'emprestado' %}checked{% endif %} onchange="document.getElementById('searchForm').submit();">
+            <label for="status_emprestado" class="filter-label">Emprestados</label>
+
+            <input type="radio" id="status_manutencao" name="status" value="manutencao" class="filter-radio" 
+                   {% if status_atual == 'manutencao' %}checked{% endif %} onchange="document.getElementById('searchForm').submit();">
+            <label for="status_manutencao" class="filter-label">Em Manutenção</label>
+        </div>
+    </form>
+
+        <ul class="results-list">
+    {% for livro in resultados %}
+        <li class="book-item">
+            <div class="book-info">
+                <span class="book-title">{{ livro.titulo }}</span>
+                <span class="book-author">Por: {{ livro.autor.nome }}</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-end;">
+                {% if status_atual == 'disponivel' or status_atual == 'todos' and livro.tem_disponivel %}
+                    <span class="status-badge badge-disponivel">Disponível</span>
+                {% elif status_atual == 'emprestado' or status_atual == 'todos' and livro.tem_emprestado %}
+                    <span class="status-badge badge-emprestado">Emprestado</span>
+                {% elif status_atual == 'manutencao' or status_atual == 'todos' and livro.tem_manutencao %}
+                    <span class="status-badge badge-manutencao">Em Manutenção</span>
+                {% else %}
+                    <span class="status-badge badge-manutencao">Sem Exemplares</span>
+                {% endif %}
+            </div>
+        </li>
+    {% empty %}
+        <li class="empty-message">Nenhum livro encontrado para os filtros selecionados.</li>
+    {% endfor %}
+</ul>
+
+
+</div>
+{% endblock %}
