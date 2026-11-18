@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Fila de Reserva: {{ livro.titulo }}</h2>
+
+<ol class="list-group list-group-numbered mt-3">
+    {% for reserva in reservas %}
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">{{ reserva.membro.usuario.username }}</div>
+                Reservado em: {{ reserva.data_reserva|date:"d/m/Y H:i" }}
+            </div>
+        </li>
+    {% empty %}
+        <p class="text-muted">Não há ninguém na fila de espera para este livro.</p>
+    {% endfor %}
+</ol>
+
+<a href="{% url 'lista_livros' %}" class="btn btn-secondary mt-3">Voltar</a>
+{% endblock %}
