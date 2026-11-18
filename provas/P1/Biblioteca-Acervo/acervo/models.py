@@ -99,3 +99,6 @@ class Reserva(models.Model):
 
     def __str__(self):
         return f"Reserva: {self.livro.titulo} - {self.membro}"
+    
+    
+    
