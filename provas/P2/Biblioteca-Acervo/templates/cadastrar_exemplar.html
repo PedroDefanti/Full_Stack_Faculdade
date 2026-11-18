@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Cadastrar Exemplar Físico</h2>
+
+<form method="post" class="mt-3 col-md-6">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="livro_id" class="form-label">Livro:</label>
+        <select name="livro_id" id="livro_id" class="form-select" required>
+            <option value="">-- Selecione o Livro --</option>
+            {% for livro in livros %}
+                <option value="{{ livro.id }}" {% if livro_selecionado and livro_selecionado.id == livro.id %}selected{% endif %}>
+                    {{ livro.titulo }} ({{ livro.autor.nome }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="codigo_patrimonio" class="form-label">Código de Patrimônio / Tombo:</label>
+        <input type="text" name="codigo_patrimonio" id="codigo_patrimonio" class="form-control" placeholder="Ex: BIB-00102" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Cadastrar Exemplar</button>
+    <a href="{% url 'lista_livros' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
