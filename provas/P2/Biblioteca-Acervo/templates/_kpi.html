@@ -1,0 +1,9 @@
+<div class="col-6 col-md-3">
+    <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+            <div class="text-muted small">{{ titulo }}</div>
+            <div class="fs-2 fw-bold {{ cor|default:'' }}">{{ valor }}</div>
+            {% if nota %}<div class="small text-muted">{{ nota }}</div>{% endif %}
+        </div>
+    </div>
+</div>
