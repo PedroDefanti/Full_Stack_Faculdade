@@ -1,12 +1,30 @@
+{% extends 'auth_base.html' %}
 
+{% block title %}Entrar · Biblioteca{% endblock %}
+{% block titulo %}Bem-vindo de volta{% endblock %}
+{% block subtitulo %}Entre para gerenciar o acervo da sua organização{% endblock %}
 
 {% block content %}
-<h2>Entrar</h2>
-
-<form method="post" class="mt-3 col-md-4">
+<form method="post" novalidate>
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ next }}">
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Entrar</button>
+
+    {% for erro in form.non_field_errors %}
+        <div class="alert alert-danger py-2">{{ erro }}</div>
+    {% endfor %}
+
+    {% include 'registration/_campo.html' with field=form.username %}
+    {% include 'registration/_campo.html' with field=form.password %}
+
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="mostrarSenha" data-toggle-senha>
+        <label class="form-check-label small text-muted" for="mostrarSenha">Mostrar senha</label>
+    </div>
+
+    <button type="submit" class="btn btn-auth w-100">Entrar</button>
 </form>
+{% endblock %}
+
+{% block rodape %}
+    Ainda não tem conta? <a href="{% url 'registro' %}" class="auth-link">Criar conta</a>
 {% endblock %}
