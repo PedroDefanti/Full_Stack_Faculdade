@@ -1,0 +1,16 @@
+<div class="card shadow-sm border-0 mb-4" id="exportar">
+    <div class="card-header bg-white fw-semibold">Exportar dados</div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <tbody>
+                {% include 'dashboard/_exportar_item.html' with url_name='exportar' recurso='acervo' label='Acervo' descricao='Títulos com exemplares disponíveis, emprestados e em manutenção' %}
+                {% include 'dashboard/_exportar_item.html' with url_name='exportar' recurso='emprestimos' label='Empréstimos' descricao='Datas, atraso, multa e situação (período selecionado)' %}
+                {% include 'dashboard/_exportar_item.html' with url_name='exportar' recurso='atrasos' label='Atrasos em aberto' descricao='Com telefone do membro, para cobrança' %}
+                {% include 'dashboard/_exportar_item.html' with url_name='exportar' recurso='ranking-livros' label='Ranking de livros' descricao='Mais emprestados (período selecionado)' %}
+                {% include 'dashboard/_exportar_item.html' with url_name='exportar' recurso='membros' label='Membros' descricao='Com total de empréstimos e reservas' %}
+                {% include 'dashboard/_exportar_item.html' with url_name='exportar' recurso='reservas' label='Reservas' descricao='Fila e reservas já atendidas' %}
+                {% include 'dashboard/_exportar_item.html' with url_name='exportar' recurso='logins' label='Logins' descricao='Quem entrou e quando (período selecionado)' %}
+            </tbody>
+        </table>
+    </div>
+</div>
