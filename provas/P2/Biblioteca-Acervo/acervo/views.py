@@ -46,11 +46,16 @@ def cadastrar_membro(request):
 @login_required
 def lista_livros(request):
     org = org_atual(request)
-    livros = Livro.objects.filter(organizacao=org).select_related("autor")
+    livros = (
+        Livro.objects.filter(organizacao=org)
+        .select_related("autor")
+        .prefetch_related("exemplares")
+    )
 
     for livro in livros:
-        livro.total_exemplares = livro.exemplares.count()
-        livro.disponiveis = livro.exemplares.filter(status="disponivel").count()
+        exemplares = livro.exemplares.all()  # vem do prefetch, sem consulta
+        livro.total_exemplares = len(exemplares)
+        livro.disponiveis = sum(1 for e in exemplares if e.status == "disponivel")
 
     return render(request, "listar_livros.html", {"livros": livros})
 
@@ -307,6 +312,7 @@ def buscar_livro(request):
         Livro.objects.filter(organizacao=org)
         .filter(filtro_total)
         .select_related("autor")
+        .prefetch_related("exemplares")  # as properties tem_* usam isto
     )
 
     if status == "disponivel":
