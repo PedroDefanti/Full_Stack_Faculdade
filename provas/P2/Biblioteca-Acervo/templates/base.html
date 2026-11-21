@@ -7,24 +7,32 @@
 </head>
 <body class="container py-4">
 
-    <nav class="mb-4 d-flex gap-2">
+    <nav class="mb-4 d-flex flex-wrap gap-2">
+        {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-dark">Dashboard</a>
+            {% if user.is_superuser %}
+                <a href="{% url 'dashboard_admin' %}" class="btn btn-dark">Painel Admin</a>
+            {% endif %}
+        {% endif %}
         <a href="{% url 'lista_livros' %}" class="btn btn-outline-primary">Livros / Acervo</a>
         <a href="{% url 'lista_emprestimos' %}" class="btn btn-outline-secondary">Empréstimos</a>
-        
-        <div class="ms-auto d-flex gap-2">
+
+        <div class="ms-auto d-flex flex-wrap gap-2">
             <a href="{% url 'cadastrar_autor' %}" class="btn btn-sm btn-outline-success">+ Cadastrar Autor</a>
             <a href="{% url 'cadastrar_livro' %}" class="btn btn-sm btn-success">+ Cadastrar Livro</a>
             <a href="{% url 'cadastrar_exemplar' %}" class="btn btn-sm btn-outline-success">+ Cadastrar Exemplar</a>
             <a href="{% url 'cadastrar_membro' %}" class="btn btn-sm btn-outline-success">+ Cadastrar Membro</a>
             <a href="{% url 'buscar_livro' %}" class="btn btn-sm btn-outline-success">Buscar Livro</a>
 
-            {# NOVO: usuário logado, organização e botão de sair (logout só aceita POST) #}
             {% if user.is_authenticated %}
-                <span class="align-self-center small text-muted">{{ user.username }} · {{ user.perfil.organizacao.nome }}</span>
+                <span class="align-self-center small text-muted">{{ user.username }}{% if user.perfil %} · {{ user.perfil.organizacao.nome }}{% endif %}</span>
                 <form method="post" action="{% url 'logout' %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-outline-danger">Sair</button>
                 </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-sm btn-outline-primary">Entrar</a>
+                <a href="{% url 'registro' %}" class="btn btn-sm btn-primary">Criar conta</a>
             {% endif %}
         </div>
     </nav>
@@ -37,5 +45,6 @@
 
     {% block content %}{% endblock %}
 
+    {% block scripts %}{% endblock %}
 </body>
 </html>
