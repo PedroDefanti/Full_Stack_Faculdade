@@ -1,36 +1,28 @@
 import csv
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from io import BytesIO
 
-from django.core.exceptions import PermissionDenied  # noqa: F401
-from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Max, Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.utils import timezone
 from django.utils.text import slugify
 
 from core.models import Organizacao, Perfil, RegistroLogin
-from core.utils import org_atual
+from core.utils import org_atual, papel_requerido
 
 from .dashboard import superuser_required
+from .forms import aplicar_periodo, periodo_validado
 from .models import Emprestimo, Exemplar, Livro, Membro, Reserva
 
 FORMATOS = {"csv", "xlsx", "json"}
-PERIODOS_VALIDOS = {7, 30, 90, 365}
 PERIGOSOS = ("=", "+", "-", "@", "\t", "\r")
 
 
 # ---------- formatação e geração de arquivos ----------
 
-def _desde(request):
-    """?dias=30 -> data inicial; sem parâmetro (ou inválido) -> None (tudo)."""
-    try:
-        dias = int(request.GET.get("dias", ""))
-    except ValueError:
-        return None
-    if dias not in PERIODOS_VALIDOS:
-        return None
-    return date.today() - timedelta(days=dias)
+def _periodo(request):  # MUDOU: inicio/fim validados pelo PeriodoForm
+    _, inicio, fim = periodo_validado(request.GET)
+    return inicio, fim
 
 
 def _valor(v, formato):
@@ -50,8 +42,7 @@ def _valor(v, formato):
 
 
 def _seguro(v):
-    """Evita 'injeção de fórmula': textos digitados pelo usuário que começam com
-    = + - @ viram fórmula ao abrir no Excel. O apóstrofo neutraliza."""
+    """Neutraliza 'injeção de fórmula' (= + - @) em textos digitados por usuários."""
     if isinstance(v, str) and v.startswith(PERIGOSOS):
         return "'" + v
     return v
@@ -61,7 +52,7 @@ def _csv(arquivo, cabecalho, linhas):
     resp = HttpResponse(content_type="text/csv; charset=utf-8")
     resp["Content-Disposition"] = f'attachment; filename="{arquivo}.csv"'
     resp.write("\ufeff")  # BOM: o Excel abre com os acentos corretos
-    escritor = csv.writer(resp, delimiter=";")  # ';' é o padrão do Excel no Brasil
+    escritor = csv.writer(resp, delimiter=";")  # padrão do Excel no Brasil
     escritor.writerow(cabecalho)
     for linha in linhas:
         escritor.writerow([_seguro(_valor(c, "csv")) for c in linha])
@@ -154,7 +145,7 @@ def _linha_emprestimo(e, hoje):
     ]
 
 
-def _acervo(org, desde):
+def _acervo(org, periodo):
     qs = (
         Livro.objects.filter(organizacao=org)
         .select_related("autor")
@@ -170,10 +161,10 @@ def _acervo(org, desde):
     return cab, ([l.titulo, l.autor.nome, l.ano, l.total, l.disp, l.emp, l.man] for l in qs)
 
 
-def _emprestimos(org, desde):
-    qs = Emprestimo.objects.filter(organizacao=org)
-    if desde:
-        qs = qs.filter(data_emprestimo__gte=desde)
+def _emprestimos(org, periodo):
+    qs = aplicar_periodo(
+        Emprestimo.objects.filter(organizacao=org), "data_emprestimo", *periodo
+    )
     qs = qs.select_related("exemplar__livro", "membro__usuario").order_by(
         "-data_emprestimo", "-id"
     )
@@ -181,7 +172,7 @@ def _emprestimos(org, desde):
     return CAB_EMPRESTIMOS, (_linha_emprestimo(e, hoje) for e in qs)
 
 
-def _atrasos(org, desde):
+def _atrasos(org, periodo):
     qs = (
         Emprestimo.objects.filter(
             organizacao=org,
@@ -209,7 +200,7 @@ def _atrasos(org, desde):
     )
 
 
-def _membros(org, desde):
+def _membros(org, periodo):
     qs = (
         Membro.objects.filter(organizacao=org)
         .select_related("usuario")
@@ -228,7 +219,7 @@ def _membros(org, desde):
     return cab, ([m.usuario.username, m.telefone, m.total, m.abertos, m.fila] for m in qs)
 
 
-def _reservas(org, desde):
+def _reservas(org, periodo):
     qs = (
         Reserva.objects.filter(organizacao=org)
         .select_related("livro", "membro__usuario")
@@ -241,18 +232,18 @@ def _reservas(org, desde):
     )
 
 
-def _logins(org, desde):
-    qs = RegistroLogin.objects.filter(organizacao=org).select_related("usuario")
-    if desde:
-        qs = qs.filter(criado_em__date__gte=desde)
-    qs = qs.order_by("-criado_em")
+def _logins(org, periodo):
+    qs = aplicar_periodo(
+        RegistroLogin.objects.filter(organizacao=org), "criado_em__date", *periodo
+    )
+    qs = qs.select_related("usuario").order_by("-criado_em")
     return ["Usuário", "Data e hora"], ([r.usuario.username, r.criado_em] for r in qs)
 
 
-def _ranking_livros(org, desde):
-    qs = Emprestimo.objects.filter(organizacao=org)
-    if desde:
-        qs = qs.filter(data_emprestimo__gte=desde)
+def _ranking_livros(org, periodo):
+    qs = aplicar_periodo(
+        Emprestimo.objects.filter(organizacao=org), "data_emprestimo", *periodo
+    )
     qs = (
         qs.values_list("exemplar__livro__titulo", "exemplar__livro__autor__nome")
         .annotate(total=Count("id"))
@@ -277,17 +268,14 @@ RECURSOS_ORG = {
 
 # ---------- conjuntos de dados do ADMIN (globais de propósito) ----------
 
-def _admin_organizacoes(desde):
+def _admin_organizacoes(periodo):
     def por_org(qs):
         return dict(
             qs.values_list("organizacao_id").annotate(n=Count("id")).order_by()
         )
 
-    emprestimos = Emprestimo.objects.all()
-    logins = RegistroLogin.objects.all()
-    if desde:
-        emprestimos = emprestimos.filter(data_emprestimo__gte=desde)
-        logins = logins.filter(criado_em__date__gte=desde)
+    emprestimos = aplicar_periodo(Emprestimo.objects.all(), "data_emprestimo", *periodo)
+    logins = aplicar_periodo(RegistroLogin.objects.all(), "criado_em__date", *periodo)
 
     usuarios = por_org(Perfil.objects.all())
     livros = por_org(Livro.objects.all())
@@ -301,7 +289,7 @@ def _admin_organizacoes(desde):
         .order_by()
     )
 
-    sufixo = "no período" if desde else "total"
+    sufixo = "no período" if any(periodo) else "total"
     cab = [
         "Organização", "Criada em", "Usuários", "Títulos", "Exemplares",
         "Membros", f"Empréstimos ({sufixo})", f"Logins ({sufixo})", "Último login",
@@ -317,20 +305,21 @@ def _admin_organizacoes(desde):
     return cab, linhas
 
 
-def _admin_usuarios(desde):
+def _admin_usuarios(periodo):
     qs = (
         Perfil.objects.select_related("usuario", "organizacao")
         .annotate(n=Count("usuario__logins"), ultimo=Max("usuario__logins__criado_em"))
         .order_by("organizacao__nome", "usuario__username")
     )
-    cab = ["Usuário", "Organização", "Total de logins", "Último login"]
-    return cab, ([p.usuario.username, p.organizacao.nome, p.n, p.ultimo] for p in qs)
+    cab = ["Usuário", "Organização", "Papel", "Total de logins", "Último login"]
+    return cab, (
+        [p.usuario.username, p.organizacao.nome, p.get_papel_display(), p.n, p.ultimo]
+        for p in qs
+    )
 
 
-def _admin_emprestimos(desde):
-    qs = Emprestimo.objects.all()
-    if desde:
-        qs = qs.filter(data_emprestimo__gte=desde)
+def _admin_emprestimos(periodo):
+    qs = aplicar_periodo(Emprestimo.objects.all(), "data_emprestimo", *periodo)
     qs = qs.select_related(
         "organizacao", "exemplar__livro", "membro__usuario"
     ).order_by("-data_emprestimo", "-id")
@@ -340,11 +329,9 @@ def _admin_emprestimos(desde):
     )
 
 
-def _admin_logins(desde):
-    qs = RegistroLogin.objects.select_related("usuario", "organizacao")
-    if desde:
-        qs = qs.filter(criado_em__date__gte=desde)
-    qs = qs.order_by("-criado_em")
+def _admin_logins(periodo):
+    qs = aplicar_periodo(RegistroLogin.objects.all(), "criado_em__date", *periodo)
+    qs = qs.select_related("usuario", "organizacao").order_by("-criado_em")
     return ["Usuário", "Organização", "Data e hora"], (
         [r.usuario.username, r.organizacao.nome if r.organizacao else "", r.criado_em]
         for r in qs
@@ -364,11 +351,11 @@ RECURSOS_ADMIN = {
 def _responder(request, recurso, formato, registro, nome_base, *args):
     if formato not in FORMATOS or recurso not in registro:
         raise Http404
-    cabecalho, linhas = registro[recurso](*args, _desde(request))
+    cabecalho, linhas = registro[recurso](*args, _periodo(request))
     return _resposta(formato, f"{nome_base}-{recurso}", cabecalho, linhas)
 
 
-@login_required
+@papel_requerido("admin")  # MUDOU: operador não exporta
 def exportar_org(request, recurso, formato):
     org = org_atual(request)
     return _responder(
