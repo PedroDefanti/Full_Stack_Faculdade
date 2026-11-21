@@ -1,0 +1,30 @@
+{% extends 'auth_base.html' %}
+
+{% block title %}Criar conta · Biblioteca{% endblock %}
+{% block titulo %}Crie a sua conta{% endblock %}
+{% block subtitulo %}Você também cria a sua organização. Os dados dela ficam isolados das demais.{% endblock %}
+
+{% block content %}
+<form method="post" novalidate>
+    {% csrf_token %}
+
+    {% for erro in form.non_field_errors %}
+        <div class="alert alert-danger py-2">{{ erro }}</div>
+    {% endfor %}
+
+    {% for field in form %}
+        {% include 'registration/_campo.html' with field=field %}
+    {% endfor %}
+
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="mostrarSenha" data-toggle-senha>
+        <label class="form-check-label small text-muted" for="mostrarSenha">Mostrar senhas</label>
+    </div>
+
+    <button type="submit" class="btn btn-auth w-100">Criar conta</button>
+</form>
+{% endblock %}
+
+{% block rodape %}
+    Já tem conta? <a href="{% url 'login' %}" class="auth-link">Entrar</a>
+{% endblock %}
