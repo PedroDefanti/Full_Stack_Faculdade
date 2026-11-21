@@ -1,0 +1,35 @@
+{{ graficos|json_script:"graficos" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    const G = JSON.parse(document.getElementById('graficos').textContent);
+
+    function criar(id, tipo, dados, rotulo) {
+        const el = document.getElementById(id);
+        if (!el || !dados) return;
+        const circular = tipo === 'doughnut';
+        new Chart(el, {
+            type: tipo,
+            data: {
+                labels: dados.labels,
+                datasets: [{
+                    label: rotulo,
+                    data: dados.valores,
+                    backgroundColor: circular
+                        ? ['#10b981', '#f59e0b', '#ef4444']
+                        : (tipo === 'line' ? 'rgba(79,70,229,.15)' : '#4f46e5'),
+                    borderColor: '#4f46e5',
+                    borderWidth: tipo === 'line' ? 2 : 0,
+                    fill: tipo === 'line',
+                    tension: 0.3,
+                    borderRadius: 6,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: circular } },
+                scales: circular ? {} : { y: { beginAtZero: true, ticks: { precision: 0 } } },
+            },
+        });
+    }
+</script>
