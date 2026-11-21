@@ -119,7 +119,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# OPCIONAL, só em desenvolvimento (Aula 17, "caçando N+1"):
+# mostra todo SQL no terminal do runserver. Remova antes de publicar.
+LOGGING = {
+    'version': 1,
+    'handlers': {'console': {'class': 'logging.StreamHandler'}},
+    'loggers': {
+        'django.db.backends': {'handlers': ['console'], 'level': 'DEBUG'},
+    },
+}
 
 
 # Email
