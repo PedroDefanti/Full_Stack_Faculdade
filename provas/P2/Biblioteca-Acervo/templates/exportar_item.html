@@ -4,8 +4,8 @@
         <div class="small text-muted">{{ descricao }}</div>
     </td>
     <td class="text-end text-nowrap">
-        <a class="btn btn-sm btn-outline-success" href="{% url url_name recurso 'csv' %}?dias={{ dias }}">CSV</a>
-        <a class="btn btn-sm btn-outline-primary" href="{% url url_name recurso 'xlsx' %}?dias={{ dias }}">Excel</a>
-        <a class="btn btn-sm btn-outline-secondary" href="{% url url_name recurso 'json' %}?dias={{ dias }}">JSON</a>
+        <a class="btn btn-sm btn-outline-success" href="{% url url_name recurso 'csv' %}{% if periodo_qs %}?{{ periodo_qs }}{% endif %}">CSV</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% url url_name recurso 'xlsx' %}{% if periodo_qs %}?{{ periodo_qs }}{% endif %}">Excel</a>
+        <a class="btn btn-sm btn-outline-secondary" href="{% url url_name recurso 'json' %}{% if periodo_qs %}?{{ periodo_qs }}{% endif %}">JSON</a>
     </td>
 </tr>
