@@ -134,7 +134,7 @@ MAILERS = {
 
 # ---- NOVO: login (as views agora exigem usuário) ----
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'lista_livros'
+LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
 # ---- NOVO: DRF (Aula 13): API só para usuário autenticado ----
@@ -148,3 +148,6 @@ REST_FRAMEWORK = {
 MESSAGE_TAGS = {
     messages_constants.ERROR: 'danger',
 }
+
+LANGUAGE_CODE = 'pt-br'
+TIME_ZONE = 'America/Sao_Paulo'
