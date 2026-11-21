@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h2 class="mb-0">Painel Admin</h2>
+        <div class="text-muted">Visão geral de todas as organizações</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="#exportar" class="btn btn-sm btn-outline-dark">⬇ Exportar</a>
+        {% include 'dashboard/_periodo.html' %}
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    {% include 'dashboard/_kpi.html' with titulo='Organizações' valor=total_orgs %}
+    {% include 'dashboard/_kpi.html' with titulo='Usuários com Perfil' valor=total_usuarios %}
+    {% include 'dashboard/_kpi.html' with titulo='Títulos (todas as orgs)' valor=total_titulos %}
+    {% include 'dashboard/_kpi.html' with titulo='Exemplares' valor=total_exemplares %}
+
+    {% include 'dashboard/_kpi.html' with titulo='Membros' valor=total_membros %}
+    {% include 'dashboard/_kpi.html' with titulo='Empréstimos no período' valor=emprestimos_periodo %}
+    {% include 'dashboard/_kpi.html' with titulo='Empréstimos em aberto' valor=emprestimos_ativos %}
+    {% include 'dashboard/_kpi.html' with titulo='Atrasados' valor=atrasados_total cor='text-danger' %}
+
+    {% include 'dashboard/_kpi.html' with titulo='Logins no período' valor=logins_periodo %}
+    {% include 'dashboard/_kpi.html' with titulo='Logins hoje' valor=logins_hoje %}
+    {% include 'dashboard/_kpi.html' with titulo='Usuários que entraram' valor=usuarios_logaram nota='no período' %}
+    {% include 'dashboard/_kpi.html' with titulo='Orgs inativas' valor=orgs_inativas nota='sem login há 30 dias'
+    cor='text-warning' %}
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-semibold">Logins por dia (todas as orgs)</div>
+            <div class="card-body" style="height: 280px;"><canvas id="gLogins"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-semibold">Logins por organização</div>
+            <div class="card-body" style="height: 280px;"><canvas id="gLoginsOrgs"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-semibold">Empréstimos por mês (6 meses)</div>
+            <div class="card-body" style="height: 260px;"><canvas id="gMeses"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-semibold">Novas organizações por mês</div>
+            <div class="card-body" style="height: 260px;"><canvas id="gNovasOrgs"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-semibold">Status dos exemplares</div>
+            <div class="card-body" style="height: 260px;"><canvas id="gStatus"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white fw-semibold">Organizações</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Organização</th>
+                    <th class="text-end">Usuários</th>
+                    <th class="text-end">Títulos</th>
+                    <th class="text-end">Exemplares</th>
+                    <th class="text-end">Membros</th>
+                    <th class="text-end">Empréstimos</th>
+                    <th class="text-end">Logins</th>
+                    <th>Último login</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in linhas %}
+                <tr>
+                    <td class="fw-semibold">{{ l.org.nome }}</td>
+                    <td class="text-end">{{ l.usuarios }}</td>
+                    <td class="text-end">{{ l.livros }}</td>
+                    <td class="text-end">{{ l.exemplares }}</td>
+                    <td class="text-end">{{ l.membros }}</td>
+                    <td class="text-end">{{ l.emprestimos }}</td>
+                    <td class="text-end">{{ l.logins }}</td>
+                    <td>
+                        {% if l.ultimo_login %}
+                        {{ l.ultimo_login|date:"d/m/Y H:i" }}
+                        {% else %}
+                        <span class="text-muted">nunca</span>
+                        {% endif %}
+                        {% if l.inativa %}<span class="badge bg-warning text-dark ms-1">inativa</span>{% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-muted py-3">Nenhuma organização cadastrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        {% include 'dashboard/_ranking.html' with titulo='Livros mais emprestados (todas as orgs)' itens=top_livros %}
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-semibold">Últimos logins</div>
+            <ul class="list-group list-group-flush">
+                {% for r in ultimos_logins %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        {{ r.usuario.username }}
+                        <span class="text-muted small">· {% if r.organizacao %}{{ r.organizacao.nome }}{% else
+                            %}sistema{% endif %}</span>
+                    </span>
+                    <span class="small text-muted">{{ r.criado_em|date:"d/m H:i" }}</span>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">Nenhum login registrado ainda.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% include 'dashboard/_scripts.html' %}
+<script>
+    criar('gLogins', 'line', G.logins, 'Logins');
+    criar('gLoginsOrgs', 'bar', G.logins_orgs, 'Logins');
+    criar('gMeses', 'bar', G.meses, 'Empréstimos');
+    criar('gNovasOrgs', 'bar', G.novas_orgs, 'Organizações');
+    criar('gStatus', 'doughnut', G.status, 'Exemplares');
+</script>
+{% endblock %}
