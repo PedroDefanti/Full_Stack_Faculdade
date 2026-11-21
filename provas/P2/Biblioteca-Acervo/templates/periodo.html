@@ -1,5 +1,13 @@
-<div class="btn-group btn-group-sm" role="group" aria-label="Período">
-    {% for d, nome in periodos %}
-        <a href="?dias={{ d }}" class="btn btn-outline-primary {% if d == dias %}active{% endif %}">{{ nome }}</a>
-    {% endfor %}
+<div>
+    <form method="get" class="d-flex flex-wrap align-items-center gap-2">
+        <label class="small text-muted mb-0" for="{{ form.inicio.id_for_label }}">Início</label>
+        {{ form.inicio }}
+        <label class="small text-muted mb-0" for="{{ form.fim.id_for_label }}">Fim</label>
+        {{ form.fim }}
+        <button type="submit" class="btn btn-sm btn-dark">Filtrar</button>
+        <a href="{{ request.path }}" class="btn btn-sm btn-link">Limpar</a>
+    </form>
+    {% for erro in form.non_field_errors %}<div class="text-danger small mt-1">{{ erro }}</div>{% endfor %}
+    {% for erro in form.inicio.errors %}<div class="text-danger small mt-1">Início: {{ erro }}</div>{% endfor %}
+    {% for erro in form.fim.errors %}<div class="text-danger small mt-1">Fim: {{ erro }}</div>{% endfor %}
 </div>
