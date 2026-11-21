@@ -2,17 +2,17 @@ from datetime import date
 from django.contrib.auth.models import User
 from django.db import models
 
-from core.models import DaOrganizacao  # NOVO
+from core.models import DaOrganizacao
 
 
-class Autor(DaOrganizacao):  # MUDOU: herda DaOrganizacao
+class Autor(DaOrganizacao):
     nome = models.CharField(max_length=150)
 
     def __str__(self):
         return self.nome
 
 
-class Livro(DaOrganizacao):  # MUDOU: herda DaOrganizacao
+class Livro(DaOrganizacao):
     titulo = models.CharField(max_length=200)
     autor = models.ForeignKey(
         Autor, on_delete=models.CASCADE, related_name="livros"
@@ -22,20 +22,21 @@ class Livro(DaOrganizacao):  # MUDOU: herda DaOrganizacao
     def __str__(self):
         return self.titulo
 
+    # MUDOU: percorrem exemplares.all(), que usa o prefetch (sem N+1)
     @property
     def tem_disponivel(self):
-        return self.exemplares.filter(status="disponivel").exists()
+        return any(e.status == "disponivel" for e in self.exemplares.all())
 
     @property
     def tem_emprestado(self):
-        return self.exemplares.filter(status="emprestado").exists()
+        return any(e.status == "emprestado" for e in self.exemplares.all())
 
     @property
     def tem_manutencao(self):
-        return self.exemplares.filter(status="manutencao").exists()
+        return any(e.status == "manutencao" for e in self.exemplares.all())
 
 
-class Membro(DaOrganizacao):  # MUDOU: herda DaOrganizacao
+class Membro(DaOrganizacao):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
     telefone = models.CharField(max_length=20, blank=True)
 
@@ -43,7 +44,7 @@ class Membro(DaOrganizacao):  # MUDOU: herda DaOrganizacao
         return self.usuario.username
 
 
-class Exemplar(DaOrganizacao):  # MUDOU: herda DaOrganizacao
+class Exemplar(DaOrganizacao):
     STATUS_CHOICES = [
         ("disponivel", "Disponível"),
         ("emprestado", "Emprestado"),
@@ -52,12 +53,12 @@ class Exemplar(DaOrganizacao):  # MUDOU: herda DaOrganizacao
     livro = models.ForeignKey(
         Livro, on_delete=models.CASCADE, related_name="exemplares"
     )
-    codigo_patrimonio = models.CharField(max_length=50)  # MUDOU: sem unique=True
+    codigo_patrimonio = models.CharField(max_length=50)
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default="disponivel"
     )
 
-    class Meta:  # NOVO: unicidade agora é por organização
+    class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=["organizacao", "codigo_patrimonio"],
@@ -69,7 +70,7 @@ class Exemplar(DaOrganizacao):  # MUDOU: herda DaOrganizacao
         return f"{self.livro.titulo} ({self.codigo_patrimonio})"
 
 
-class Emprestimo(DaOrganizacao):  # MUDOU: herda DaOrganizacao
+class Emprestimo(DaOrganizacao):
     VALOR_MULTA_DIARIA = 2.00  # R$ 2,00 por dia de atraso
 
     exemplar = models.ForeignKey(Exemplar, on_delete=models.CASCADE)
@@ -78,6 +79,12 @@ class Emprestimo(DaOrganizacao):  # MUDOU: herda DaOrganizacao
     data_prevista_devolucao = models.DateField()
     data_devolucao = models.DateField(null=True, blank=True)
     multa_paga = models.BooleanField(default=False)
+
+    class Meta:  # NOVO: filtros e agrupamentos do dashboard
+        indexes = [
+            models.Index(fields=["organizacao", "data_emprestimo"], name="emp_org_data_idx"),
+            models.Index(fields=["data_emprestimo"], name="emp_data_idx"),
+        ]
 
     @property
     def dias_atraso(self):
@@ -98,7 +105,7 @@ class Emprestimo(DaOrganizacao):  # MUDOU: herda DaOrganizacao
         return f"{self.exemplar} - {self.membro}"
 
 
-class Reserva(DaOrganizacao):  # MUDOU: herda DaOrganizacao
+class Reserva(DaOrganizacao):
     livro = models.ForeignKey(Livro, on_delete=models.CASCADE)
     membro = models.ForeignKey(Membro, on_delete=models.CASCADE)
     data_reserva = models.DateTimeField(auto_now_add=True)
