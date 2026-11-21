@@ -1,0 +1,5 @@
+<div class="btn-group btn-group-sm" role="group" aria-label="Período">
+    {% for d, nome in periodos %}
+        <a href="?dias={{ d }}" class="btn btn-outline-primary {% if d == dias %}active{% endif %}">{{ nome }}</a>
+    {% endfor %}
+</div>
