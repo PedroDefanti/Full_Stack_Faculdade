@@ -6,27 +6,29 @@
         <h2 class="mb-0">Dashboard</h2>
         <div class="text-muted">{{ org.nome }}</div>
     </div>
-    <div class="d-flex gap-2">
-        <a href="#exportar" class="btn btn-sm btn-outline-dark">⬇ Exportar</a>
+    <div class="d-flex flex-wrap align-items-start gap-2">
+        {% if pode_exportar %}<a href="#exportar" class="btn btn-sm btn-outline-dark">⬇ Exportar</a>{% endif %}
         {% include 'dashboard/_periodo.html' %}
     </div>
 </div>
 
 <div class="row g-3 mb-4">
-    {% include 'dashboard/_kpi.html' with titulo='Títulos no acervo' valor=total_titulos %}
-    {% include 'dashboard/_kpi.html' with titulo='Exemplares' valor=total_exemplares %}
+    {% include 'dashboard/_kpi.html' with titulo='Títulos no acervo' valor=acervo.titulos %}
+    {% include 'dashboard/_kpi.html' with titulo='Exemplares' valor=acervo.exemplares %}
     {% include 'dashboard/_kpi.html' with titulo='Ocupação do acervo' valor=ocupacao nota='exemplares emprestados' %}
-    {% include 'dashboard/_kpi.html' with titulo='Membros' valor=total_membros %}
+    {% include 'dashboard/_kpi.html' with titulo='Membros cadastrados' valor=acervo.membros %}
 
-    {% include 'dashboard/_kpi.html' with titulo='Empréstimos no período' valor=emprestimos_periodo %}
-    {% include 'dashboard/_kpi.html' with titulo='Empréstimos em aberto' valor=emprestimos_ativos %}
-    {% include 'dashboard/_kpi.html' with titulo='Atrasados' valor=atrasados_total cor=cor_atrasados %}
+    {% include 'dashboard/_kpi.html' with titulo='Empréstimos no período' valor=kpis.total nota=nota_abertos %}
+    {% include 'dashboard/_kpi.html' with titulo='Membros ativos no período' valor=kpis.membros %}
+    {% include 'dashboard/_kpi.html' with titulo='Em aberto agora' valor=atual.abertos %}
+    {% include 'dashboard/_kpi.html' with titulo='Atrasados agora' valor=atual.atrasados cor='text-danger' %}
+
     {% include 'dashboard/_kpi.html' with titulo='Multas acumuladas' valor=multas nota='devolvidos e em aberto' %}
-
     {% include 'dashboard/_kpi.html' with titulo='Reservas na fila' valor=reservas_fila %}
-    {% include 'dashboard/_kpi.html' with titulo='Logins no período' valor=logins_periodo %}
-    {% include 'dashboard/_kpi.html' with titulo='Usuários que entraram' valor=usuarios_logaram nota='no período' %}
-    {% include 'dashboard/_kpi.html' with titulo='Logins hoje' valor=logins_hoje %}
+    {% if mostra_logins %}
+        {% include 'dashboard/_kpi.html' with titulo='Logins no período' valor=logins_periodo nota=nota_logins %}
+        {% include 'dashboard/_kpi.html' with titulo='Logins hoje' valor=logins_hoje %}
+    {% endif %}
 </div>
 
 <div class="row g-3 mb-4">
@@ -36,10 +38,13 @@
             <div class="card-body" style="height: 280px;"><canvas id="gStatus"></canvas></div>
         </div>
     </div>
+    {% if mostra_series %}
     <div class="col-md-4">
         <div class="card shadow-sm border-0 h-100">
-            <div class="card-header bg-white fw-semibold">Empréstimos por mês (6 meses)</div>
-            <div class="card-body" style="height: 280px;"><canvas id="gMeses"></canvas></div>
+            <div class="card-header bg-white fw-semibold">Empréstimos por mês</div>
+            <div class="card-body" style="height: 280px;">
+                {% if por_mes %}<canvas id="gMeses"></canvas>{% else %}<p class="text-muted">Sem dados no período.</p>{% endif %}
+            </div>
         </div>
     </div>
     <div class="col-md-4">
@@ -48,91 +53,64 @@
             <div class="card-body" style="height: 280px;"><canvas id="gLogins"></canvas></div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <div class="row g-3 mb-4">
-    <div class="col-md-6">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-header bg-white fw-semibold">Livros mais emprestados</div>
-            <div class="card-body" style="height: 280px;"><canvas id="gTopLivros"></canvas></div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        {% include 'dashboard/_ranking.html' with titulo='Autores mais emprestados' itens=top_autores %}
-    </div>
+    <div class="col-md-4">{% include 'dashboard/_ranking.html' with titulo='Livros mais emprestados' itens=ranking_livros %}</div>
+    <div class="col-md-4">{% include 'dashboard/_ranking.html' with titulo='Autores mais emprestados' itens=ranking_autores %}</div>
+    <div class="col-md-4">{% include 'dashboard/_ranking.html' with titulo='Membros mais ativos' itens=ranking_membros %}</div>
 </div>
 
 <div class="row g-3 mb-4">
-    <div class="col-md-4">
-        {% include 'dashboard/_ranking.html' with titulo='Membros mais ativos' itens=top_membros %}
-    </div>
-    <div class="col-md-4">
-        {% include 'dashboard/_ranking.html' with titulo='Maiores filas de reserva' itens=fila %}
-    </div>
-    <div class="col-md-4">
-        {% include 'dashboard/_ranking.html' with titulo='Quem mais entrou no sistema' itens=top_usuarios %}
-    </div>
-</div>
-
-<div class="row g-3 mb-4">
-    <div class="col-md-8">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-header bg-white fw-semibold">Empréstimos atrasados</div>
-            <div class="table-responsive">
-                <table class="table table-sm align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>Livro</th>
-                            <th>Membro</th>
-                            <th>Venceu em</th>
-                            <th>Atraso</th>
-                            <th>Multa</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for e in lista_atrasados %}
-                        <tr>
-                            <td>{{ e.exemplar.livro.titulo }}</td>
-                            <td>{{ e.membro.usuario.username }}</td>
-                            <td>{{ e.data_prevista_devolucao|date:"d/m/Y" }}</td>
-                            <td><span class="badge bg-danger">{{ e.dias_atraso }} dia{{ e.dias_atraso|pluralize
-                                    }}</span></td>
-                            <td>R$ {{ e.valor_multa|floatformat:2 }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-muted py-3">Nenhum atraso. 🎉</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <div class="col-md-4">{% include 'dashboard/_ranking.html' with titulo='Maiores filas de reserva' itens=fila %}</div>
+    {% if mostra_logins %}
+    <div class="col-md-4">{% include 'dashboard/_ranking.html' with titulo='Quem mais entrou no sistema' itens=top_usuarios %}</div>
+    {% endif %}
     <div class="col-md-4">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-white fw-semibold">Livros parados no período</div>
             <ul class="list-group list-group-flush">
                 {% for livro in livros_parados %}
-                <li class="list-group-item">
-                    <div class="fw-semibold">{{ livro.titulo }}</div>
-                    <div class="small text-muted">{{ livro.autor.nome }}</div>
-                </li>
+                    <li class="list-group-item">
+                        <div class="fw-semibold">{{ livro.titulo }}</div>
+                        <div class="small text-muted">{{ livro.autor.nome }}</div>
+                    </li>
                 {% empty %}
-                <li class="list-group-item text-muted">Todos os livros tiveram saída.</li>
+                    <li class="list-group-item text-muted">Todos os livros tiveram saída.</li>
                 {% endfor %}
             </ul>
         </div>
     </div>
 </div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white fw-semibold">Empréstimos atrasados</div>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+            <thead>
+                <tr><th>Livro</th><th>Membro</th><th>Venceu em</th><th>Atraso</th><th>Multa</th></tr>
+            </thead>
+            <tbody>
+                {% for e in lista_atrasados %}
+                    <tr>
+                        <td>{{ e.exemplar.livro.titulo }}</td>
+                        <td>{{ e.membro.usuario.username }}</td>
+                        <td>{{ e.data_prevista_devolucao|date:"d/m/Y" }}</td>
+                        <td><span class="badge bg-danger">{{ e.dias_atraso }} dia{{ e.dias_atraso|pluralize }}</span></td>
+                        <td>R$ {{ e.valor_multa|floatformat:2 }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="text-muted py-3">Nenhum atraso. 🎉</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if pode_exportar %}{% include 'dashboard/_exportar_org.html' %}{% endif %}
 {% endblock %}
 
 {% block scripts %}
-{% include 'dashboard/_scripts.html' %}
-<script>
-    criar('gStatus', 'doughnut', G.status, 'Exemplares');
-    criar('gMeses', 'bar', G.meses, 'Empréstimos');
-    criar('gLogins', 'line', G.logins, 'Logins');
-    criar('gTopLivros', 'bar', G.top_livros, 'Empréstimos');
-</script>
+    {% include 'dashboard/_scripts.html' %}
 {% endblock %}
