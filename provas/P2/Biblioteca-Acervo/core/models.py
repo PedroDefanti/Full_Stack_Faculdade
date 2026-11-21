@@ -29,3 +29,20 @@ class DaOrganizacao(models.Model):
 
     class Meta:
         abstract = True
+        
+class RegistroLogin(models.Model):
+    usuario = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="logins"
+    )
+    # sem organização para superusuário sem Perfil
+    organizacao = models.ForeignKey(
+        Organizacao,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="logins",
+    )
+    criado_em = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    def __str__(self):
+        return f"{self.usuario.username} em {self.criado_em:%d/%m/%Y %H:%M}"
