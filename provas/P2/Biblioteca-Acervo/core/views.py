@@ -59,7 +59,7 @@ def registro_view(request):
         with transaction.atomic():
             user = form.save()
             org = Organizacao.objects.create(nome=form.cleaned_data["organizacao"])
-            Perfil.objects.create(usuario=user, organizacao=org)
+            Perfil.objects.create(usuario=user, organizacao=org, papel="admin")  # MUDOU
 
         login(request, user)
         messages.success(
