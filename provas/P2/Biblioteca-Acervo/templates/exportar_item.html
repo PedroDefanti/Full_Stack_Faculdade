@@ -1,0 +1,11 @@
+<tr>
+    <td>
+        <div class="fw-semibold">{{ label }}</div>
+        <div class="small text-muted">{{ descricao }}</div>
+    </td>
+    <td class="text-end text-nowrap">
+        <a class="btn btn-sm btn-outline-success" href="{% url url_name recurso 'csv' %}?dias={{ dias }}">CSV</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% url url_name recurso 'xlsx' %}?dias={{ dias }}">Excel</a>
+        <a class="btn btn-sm btn-outline-secondary" href="{% url url_name recurso 'json' %}?dias={{ dias }}">JSON</a>
+    </td>
+</tr>
