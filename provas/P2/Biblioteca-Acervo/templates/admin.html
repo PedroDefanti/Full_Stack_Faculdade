@@ -8,25 +8,25 @@
     </div>
     <div class="d-flex flex-wrap align-items-start gap-2">
         <a href="#exportar" class="btn btn-sm btn-outline-dark">⬇ Exportar</a>
-        {% include 'dashboard/_periodo.html' %}
+        {% include 'periodo.html' %}
     </div>
 </div>
 
 <div class="row g-3 mb-4">
-    {% include 'dashboard/_kpi.html' with titulo='Organizações' valor=total_orgs %}
-    {% include 'dashboard/_kpi.html' with titulo='Usuários com Perfil' valor=total_usuarios %}
-    {% include 'dashboard/_kpi.html' with titulo='Títulos (todas as orgs)' valor=total_titulos %}
-    {% include 'dashboard/_kpi.html' with titulo='Exemplares' valor=total_exemplares %}
+    {% include 'kpi.html' with titulo='Organizações' valor=total_orgs %}
+    {% include 'kpi.html' with titulo='Usuários com Perfil' valor=total_usuarios %}
+    {% include 'kpi.html' with titulo='Títulos (todas as orgs)' valor=total_titulos %}
+    {% include 'kpi.html' with titulo='Exemplares' valor=total_exemplares %}
 
-    {% include 'dashboard/_kpi.html' with titulo='Membros' valor=total_membros %}
-    {% include 'dashboard/_kpi.html' with titulo='Empréstimos no período' valor=kpis.total nota=nota_abertos %}
-    {% include 'dashboard/_kpi.html' with titulo='Em aberto agora' valor=atual.abertos %}
-    {% include 'dashboard/_kpi.html' with titulo='Atrasados agora' valor=atual.atrasados cor='text-danger' %}
+    {% include 'kpi.html' with titulo='Membros' valor=total_membros %}
+    {% include 'kpi.html' with titulo='Empréstimos no período' valor=kpis.total nota=nota_abertos %}
+    {% include 'kpi.html' with titulo='Em aberto agora' valor=atual.abertos %}
+    {% include 'kpi.html' with titulo='Atrasados agora' valor=atual.atrasados cor='text-danger' %}
 
-    {% include 'dashboard/_kpi.html' with titulo='Logins no período' valor=logins_periodo %}
-    {% include 'dashboard/_kpi.html' with titulo='Logins hoje' valor=logins_hoje %}
-    {% include 'dashboard/_kpi.html' with titulo='Usuários que entraram' valor=usuarios_logaram nota='no período' %}
-    {% include 'dashboard/_kpi.html' with titulo='Orgs inativas' valor=orgs_inativas nota='sem login há 30 dias' cor='text-warning' %}
+    {% include 'kpi.html' with titulo='Logins no período' valor=logins_periodo %}
+    {% include 'kpi.html' with titulo='Logins hoje' valor=logins_hoje %}
+    {% include 'kpi.html' with titulo='Usuários que entraram' valor=usuarios_logaram nota='no período' %}
+    {% include 'kpi.html' with titulo='Orgs inativas' valor=orgs_inativas nota='sem login há 30 dias' cor='text-warning' %}
 </div>
 
 <div class="row g-3 mb-4">
@@ -108,7 +108,7 @@
 
 <div class="row g-3 mb-4">
     <div class="col-md-6">
-        {% include 'dashboard/_ranking.html' with titulo='Livros mais emprestados (todas as orgs)' itens=top_livros %}
+        {% include 'ranking.html' with titulo='Livros mais emprestados (todas as orgs)' itens=top_livros %}
     </div>
     <div class="col-md-6">
         <div class="card shadow-sm border-0 h-100">
@@ -129,9 +129,9 @@
     </div>
 </div>
 
-{% include 'dashboard/_exportar_admin.html' %}
+{% include 'exportar_admin.html' %}
 {% endblock %}
 
 {% block scripts %}
-    {% include 'dashboard/_scripts.html' %}
+    {% include 'scripts.html' %}
 {% endblock %}
