@@ -242,7 +242,7 @@ def dashboard_org(request):
         )
         contexto["graficos"]["logins"] = _logins_por_dia(logins, inicio, fim)
 
-    return render(request, "dashboard/org.html", contexto)
+    return render(request, "orgs.html", contexto)
 
 
 # ---------- dashboard do admin do sistema (todas as organizações) ----------
@@ -320,7 +320,7 @@ def dashboard_admin(request):
 
     return render(
         request,
-        "dashboard/admin.html",
+        "admin.html",
         {
             "form": form,
             "periodo_qs": _periodo_qs(inicio, fim),
