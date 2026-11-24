@@ -44,7 +44,7 @@ def login_view(request):
             return redirect(_destino_inicial(user))  # MUDOU
 
     return render(
-        request, "registration/login.html", {"form": form, "next": proximo}
+        request, "login.html", {"form": form, "next": proximo}
     )
 
 
@@ -67,7 +67,7 @@ def registro_view(request):
         )
         return redirect("dashboard")  # MUDOU
 
-    return render(request, "registration/registro.html", {"form": form})
+    return render(request, "registro.html", {"form": form})
 
 
 @require_POST
