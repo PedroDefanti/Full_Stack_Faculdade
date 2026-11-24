@@ -3,10 +3,10 @@
     <div class="table-responsive">
         <table class="table align-middle mb-0">
             <tbody>
-                {% include 'dashboard/_exportar_item.html' with url_name='exportar_admin' recurso='organizacoes' label='Organizações' descricao='Uso, volume de dados e último login (período selecionado)' %}
-                {% include 'dashboard/_exportar_item.html' with url_name='exportar_admin' recurso='usuarios' label='Usuários' descricao='Com total de logins e último acesso' %}
-                {% include 'dashboard/_exportar_item.html' with url_name='exportar_admin' recurso='emprestimos' label='Empréstimos' descricao='De todas as organizações (período selecionado)' %}
-                {% include 'dashboard/_exportar_item.html' with url_name='exportar_admin' recurso='logins' label='Logins' descricao='De todas as organizações (período selecionado)' %}
+                {% include 'exportar_item.html' with url_name='exportar_admin' recurso='organizacoes' label='Organizações' descricao='Uso, volume de dados e último login (período selecionado)' %}
+                {% include 'exportar_item.html' with url_name='exportar_admin' recurso='usuarios' label='Usuários' descricao='Com total de logins e último acesso' %}
+                {% include 'exportar_item.html' with url_name='exportar_admin' recurso='emprestimos' label='Empréstimos' descricao='De todas as organizações (período selecionado)' %}
+                {% include 'exportar_item.html' with url_name='exportar_admin' recurso='logins' label='Logins' descricao='De todas as organizações (período selecionado)' %}
             </tbody>
         </table>
     </div>
