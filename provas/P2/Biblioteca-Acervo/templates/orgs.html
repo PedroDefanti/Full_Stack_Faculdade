@@ -8,26 +8,26 @@
     </div>
     <div class="d-flex flex-wrap align-items-start gap-2">
         {% if pode_exportar %}<a href="#exportar" class="btn btn-sm btn-outline-dark">⬇ Exportar</a>{% endif %}
-        {% include 'dashboard/_periodo.html' %}
+        {% include 'periodo.html' %}
     </div>
 </div>
 
 <div class="row g-3 mb-4">
-    {% include 'dashboard/_kpi.html' with titulo='Títulos no acervo' valor=acervo.titulos %}
-    {% include 'dashboard/_kpi.html' with titulo='Exemplares' valor=acervo.exemplares %}
-    {% include 'dashboard/_kpi.html' with titulo='Ocupação do acervo' valor=ocupacao nota='exemplares emprestados' %}
-    {% include 'dashboard/_kpi.html' with titulo='Membros cadastrados' valor=acervo.membros %}
+    {% include 'kpi.html' with titulo='Títulos no acervo' valor=acervo.titulos %}
+    {% include 'kpi.html' with titulo='Exemplares' valor=acervo.exemplares %}
+    {% include 'kpi.html' with titulo='Ocupação do acervo' valor=ocupacao nota='exemplares emprestados' %}
+    {% include 'kpi.html' with titulo='Membros cadastrados' valor=acervo.membros %}
 
-    {% include 'dashboard/_kpi.html' with titulo='Empréstimos no período' valor=kpis.total nota=nota_abertos %}
-    {% include 'dashboard/_kpi.html' with titulo='Membros ativos no período' valor=kpis.membros %}
-    {% include 'dashboard/_kpi.html' with titulo='Em aberto agora' valor=atual.abertos %}
-    {% include 'dashboard/_kpi.html' with titulo='Atrasados agora' valor=atual.atrasados cor='text-danger' %}
+    {% include 'kpi.html' with titulo='Empréstimos no período' valor=kpis.total nota=nota_abertos %}
+    {% include 'kpi.html' with titulo='Membros ativos no período' valor=kpis.membros %}
+    {% include 'kpi.html' with titulo='Em aberto agora' valor=atual.abertos %}
+    {% include 'kpi.html' with titulo='Atrasados agora' valor=atual.atrasados cor='text-danger' %}
 
-    {% include 'dashboard/_kpi.html' with titulo='Multas acumuladas' valor=multas nota='devolvidos e em aberto' %}
-    {% include 'dashboard/_kpi.html' with titulo='Reservas na fila' valor=reservas_fila %}
+    {% include 'kpi.html' with titulo='Multas acumuladas' valor=multas nota='devolvidos e em aberto' %}
+    {% include 'kpi.html' with titulo='Reservas na fila' valor=reservas_fila %}
     {% if mostra_logins %}
-        {% include 'dashboard/_kpi.html' with titulo='Logins no período' valor=logins_periodo nota=nota_logins %}
-        {% include 'dashboard/_kpi.html' with titulo='Logins hoje' valor=logins_hoje %}
+        {% include 'kpi.html' with titulo='Logins no período' valor=logins_periodo nota=nota_logins %}
+        {% include 'kpi.html' with titulo='Logins hoje' valor=logins_hoje %}
     {% endif %}
 </div>
 
@@ -57,15 +57,15 @@
 </div>
 
 <div class="row g-3 mb-4">
-    <div class="col-md-4">{% include 'dashboard/_ranking.html' with titulo='Livros mais emprestados' itens=ranking_livros %}</div>
-    <div class="col-md-4">{% include 'dashboard/_ranking.html' with titulo='Autores mais emprestados' itens=ranking_autores %}</div>
-    <div class="col-md-4">{% include 'dashboard/_ranking.html' with titulo='Membros mais ativos' itens=ranking_membros %}</div>
+    <div class="col-md-4">{% include 'ranking.html' with titulo='Livros mais emprestados' itens=ranking_livros %}</div>
+    <div class="col-md-4">{% include 'ranking.html' with titulo='Autores mais emprestados' itens=ranking_autores %}</div>
+    <div class="col-md-4">{% include 'ranking.html' with titulo='Membros mais ativos' itens=ranking_membros %}</div>
 </div>
 
 <div class="row g-3 mb-4">
-    <div class="col-md-4">{% include 'dashboard/_ranking.html' with titulo='Maiores filas de reserva' itens=fila %}</div>
+    <div class="col-md-4">{% include 'ranking.html' with titulo='Maiores filas de reserva' itens=fila %}</div>
     {% if mostra_logins %}
-    <div class="col-md-4">{% include 'dashboard/_ranking.html' with titulo='Quem mais entrou no sistema' itens=top_usuarios %}</div>
+    <div class="col-md-4">{% include 'ranking.html' with titulo='Quem mais entrou no sistema' itens=top_usuarios %}</div>
     {% endif %}
     <div class="col-md-4">
         <div class="card shadow-sm border-0 h-100">
@@ -108,9 +108,9 @@
     </div>
 </div>
 
-{% if pode_exportar %}{% include 'dashboard/_exportar_org.html' %}{% endif %}
+{% if pode_exportar %}{% include 'exportar_org.html' %}{% endif %}
 {% endblock %}
 
 {% block scripts %}
-    {% include 'dashboard/_scripts.html' %}
+    {% include 'scripts.html' %}
 {% endblock %}
