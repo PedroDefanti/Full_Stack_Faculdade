@@ -8,7 +8,6 @@ admin.site.register(Organizacao)
 class PerfilAdmin(admin.ModelAdmin):
     list_display = ("usuario", "organizacao", "papel")
     list_filter = ("organizacao", "papel")
-
 @admin.register(RegistroLogin)
 class RegistroLoginAdmin(admin.ModelAdmin):
     list_display = ("usuario", "organizacao", "criado_em")
