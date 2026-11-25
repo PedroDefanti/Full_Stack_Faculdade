@@ -4,7 +4,7 @@
 
 ```bash
 cd provas
-cd P1
+cd P2
 cd Biblioteca-Acervo
 ```
 
